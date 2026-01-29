@@ -63,12 +63,12 @@ export default function SettingsPage() {
       className="space-y-6"
     >
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Configure system settings and preferences</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Configure system settings and preferences</p>
       </div>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full flex overflow-x-auto">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="pipeline">Pipeline Configuration</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -115,10 +115,10 @@ export default function SettingsPage() {
               <CardTitle>Pipeline Configuration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label>Auto Retry Failed Studies</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Automatically retry failed studies
                   </p>
                 </div>
@@ -164,10 +164,10 @@ export default function SettingsPage() {
               <CardTitle>Notification Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label>Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Send email notifications for important events
                   </p>
                 </div>
@@ -177,10 +177,10 @@ export default function SettingsPage() {
                 />
               </div>
               <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label>Slack Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Send notifications to Slack
                   </p>
                 </div>
@@ -260,13 +260,14 @@ export default function SettingsPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="sticky bottom-0 flex justify-end border-t border-border bg-background p-4">
-        <Button onClick={handleSave} disabled={isSaving}>
+      <div className="sticky bottom-0 flex justify-end border-t border-border bg-background p-3 md:p-4">
+        <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </motion.div>
   )
 }
+
 
 

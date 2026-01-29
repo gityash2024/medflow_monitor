@@ -4,6 +4,7 @@ import { RefreshCw, FileText, Activity, CheckCircle2, XCircle, Eye } from 'lucid
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { DataLoader } from '@/components/ui/DataLoader'
 import { dashboardStats, livePipeline, mockStudies } from '@/mock/mockStudies'
 import { useNavigate } from 'react-router-dom'
 
@@ -27,8 +28,17 @@ const itemVariants = {
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [stats, setStats] = useState(dashboardStats)
+
+  // Initial loading delay for mock data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleRefresh = () => {
     setIsRefreshing(true)
@@ -71,6 +81,15 @@ export default function DashboardPage() {
 
   const recentStudies = mockStudies.slice(0, 10)
 
+  // Show loader while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DataLoader message="Loading dashboard data..." />
+      </div>
+    )
+  }
+
   return (
     <motion.div
       variants={containerVariants}
@@ -78,15 +97,16 @@ export default function DashboardPage() {
       animate="visible"
       className="space-y-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Monitor your DICOM pipeline in real-time</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Monitor your DICOM pipeline in real-time</p>
         </div>
         <Button
           variant="outline"
           onClick={handleRefresh}
           disabled={isRefreshing}
+          className="w-full sm:w-auto"
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -94,7 +114,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -184,11 +204,11 @@ export default function DashboardPage() {
                         {study.status}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
                       {['Received', 'Anonymization', 'Sent to XNAT', 'Stored in XNAT', 'Report Generated', 'Report Synced'].map((stage, index) => {
                         const status = getStageStatus(study.stages[index], index, study.currentStage)
                         return (
-                          <div key={stage} className="flex-1">
+                          <div key={stage} className="flex-1 min-w-[100px]">
                             <div className="mb-1 flex items-center justify-between text-xs">
                               <span className="text-muted-foreground">{stage}</span>
                               {status === 'completed' && (
@@ -241,9 +261,9 @@ export default function DashboardPage() {
               {recentStudies.map((study) => (
                 <div
                   key={study.id}
-                  className="flex items-center justify-between rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 hover:bg-white/10 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 hover:bg-white/10 transition-colors"
                 >
-                  <div className="flex items-center gap-4 flex-1">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1">
                     <Badge variant={getModalityColor(study.modality)}>
                       {study.modality}
                     </Badge>
@@ -253,14 +273,14 @@ export default function DashboardPage() {
                         {study.studyUID}
                       </p>
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground hidden sm:block">
                       {new Date(study.date).toLocaleString()}
                     </div>
                     <Badge variant={getStatusColor(study.status)}>
                       {study.status}
                     </Badge>
                     {study.duration && (
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground hidden md:block">
                         {study.duration}
                       </div>
                     )}

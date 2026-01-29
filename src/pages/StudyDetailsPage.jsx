@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, RefreshCw, ExternalLink, CheckCircle2, XCircle, Clock, AlertCircle, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -6,14 +7,24 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
+import { DataLoader } from '@/components/ui/DataLoader'
 import { studyDetails, failedStudyDetails, mockStudies } from '@/mock/mockStudies'
 import { PIPELINE_STAGES } from '@/utils/constants'
 
 export default function StudyDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(true)
   const study = mockStudies.find((s) => s.id === parseInt(id))
   const details = study?.status === 'failed' ? failedStudyDetails : studyDetails
+
+  // Initial loading delay for mock data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -50,31 +61,40 @@ export default function StudyDetailsPage() {
     return <Clock className="h-5 w-5 text-muted-foreground" />
   }
 
+  // Show loader while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DataLoader message="Loading study details..." />
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/studies')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Study Details</h1>
-            <p className="text-muted-foreground">{details.studyUID}</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Study Details</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{details.studyUID}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {details.status === 'failed' && (
-            <Button variant="outline">
+            <Button variant="outline" className="flex-1 sm:flex-none">
               <RefreshCw className="mr-2 h-4 w-4" />
               Retry
             </Button>
           )}
           {details.status === 'completed' && (
-            <Button>
+            <Button className="flex-1 sm:flex-none">
               <ExternalLink className="mr-2 h-4 w-4" />
               Open Viewer
             </Button>
@@ -103,7 +123,7 @@ export default function StudyDetailsPage() {
               const isCompleted = log?.status === 'complete'
               const isFailed = log?.status === 'failed'
               const isCurrent = index === details.currentStage - 1 && !isCompleted && !isFailed
-              
+
               return (
                 <div key={stage} className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-border bg-card">
@@ -137,11 +157,11 @@ export default function StudyDetailsPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="logs">Pipeline Logs</TabsTrigger>
-          <TabsTrigger value="viewer">Viewer</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+        <TabsList className="w-full flex overflow-x-auto">
+          <TabsTrigger value="overview" className="flex-1 min-w-[100px]">Overview</TabsTrigger>
+          <TabsTrigger value="logs" className="flex-1 min-w-[100px]">Pipeline Logs</TabsTrigger>
+          <TabsTrigger value="viewer" className="flex-1 min-w-[100px]">Viewer</TabsTrigger>
+          <TabsTrigger value="reports" className="flex-1 min-w-[100px]">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -150,7 +170,7 @@ export default function StudyDetailsPage() {
               <CardTitle>Study Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Modality</p>
                   <p className="font-medium">{details.modality}</p>
@@ -159,13 +179,13 @@ export default function StudyDetailsPage() {
                   <p className="text-sm text-muted-foreground">Patient ID</p>
                   <p className="font-medium">{details.patientID}</p>
                 </div>
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <p className="text-sm text-muted-foreground">Description</p>
                   <p className="font-medium">{details.description}</p>
                 </div>
               </div>
               <Separator />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Study Date</p>
                   <p className="font-medium">{details.studyDate}</p>
@@ -180,7 +200,7 @@ export default function StudyDetailsPage() {
                 </div>
               </div>
               <Separator />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Duration</p>
                   <p className="font-medium">{details.totalDuration || 'N/A'}</p>
@@ -273,14 +293,14 @@ export default function StudyDetailsPage() {
             <CardContent>
               {details.report ? (
                 <div className="rounded-lg border border-border p-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <p className="font-medium">{details.report.filename}</p>
                       <p className="text-sm text-muted-foreground">
                         Generated: {details.report.generated}
                       </p>
                     </div>
-                    <Button variant="outline">
+                    <Button variant="outline" className="w-full sm:w-auto">
                       <Download className="mr-2 h-4 w-4" />
                       Download
                     </Button>

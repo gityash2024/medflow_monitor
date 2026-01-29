@@ -4,28 +4,33 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { 
-  Mail, 
-  Lock, 
-  Activity, 
-  TrendingUp, 
-  Users, 
-  FileText, 
-  Heart,
-  Stethoscope,
-  Shield,
-  Eye,
-  EyeOff,
-  Loader2,
-  ChevronRight,
-  Sparkles
-} from 'lucide-react'
+import {
+  MailIcon,
+  LockIcon,
+  ActivityIcon,
+  TrendingUpIcon,
+  UsersIcon,
+  ReportsIcon,
+  HeartIcon,
+  StethoscopeIcon,
+  AdminRoleIcon,
+  TechRoleIcon,
+  RadRoleIcon,
+  ShieldIcon,
+  EyeIcon,
+  EyeOffIcon,
+  LoaderIcon,
+  ChevronRightIcon,
+  SparklesIcon
+} from '@/components/ui/Icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Logo } from '@/components/ui/Logo'
 import { useAuthStore } from '@/store/authStore'
 import { demoAccounts } from '@/mock/mockUsers'
-import { toast } from 'sonner'
+import { toast, Toaster } from 'sonner'
+import { useUIStore } from '@/store/uiStore'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -67,30 +72,30 @@ function StatsCard({ icon: Icon, value, label, delay, color }) {
       initial={{ opacity: 0, y: 30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.6, delay }}
-      whileHover={{ 
-        scale: 1.05, 
+      whileHover={{
+        scale: 1.05,
         boxShadow: `0 20px 40px ${color}30`,
         transition: { duration: 0.2 }
       }}
       className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all duration-300"
     >
       {/* Glow effect on hover */}
-      <div 
+      <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ 
-          background: `radial-gradient(circle at 50% 50%, ${color}20, transparent 70%)` 
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${color}20, transparent 70%)`
         }}
       />
-      
+
       <div className="relative z-10">
-        <motion.div 
+        <motion.div
           className="mb-3"
           whileHover={{ rotate: [0, -10, 10, 0] }}
           transition={{ duration: 0.5 }}
         >
           <Icon className="h-8 w-8" style={{ color }} />
         </motion.div>
-        <motion.p 
+        <motion.p
           className="text-3xl font-bold text-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -107,25 +112,23 @@ function StatsCard({ icon: Icon, value, label, delay, color }) {
 // Animated Input Component
 function AnimatedInput({ icon: Icon, error, ...props }) {
   const [isFocused, setIsFocused] = useState(false)
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="relative"
       animate={{ scale: isFocused ? 1.02 : 1 }}
       transition={{ duration: 0.2 }}
     >
-      <div 
-        className={`absolute inset-0 rounded-xl transition-all duration-300 ${
-          isFocused 
-            ? 'bg-gradient-to-r from-primary/20 via-primary/10 to-secondary/20 blur-xl' 
-            : ''
-        }`} 
+      <div
+        className={`absolute inset-0 rounded-xl transition-all duration-300 ${isFocused
+          ? 'bg-gradient-to-r from-primary/20 via-primary/10 to-secondary/20 blur-xl'
+          : ''
+          }`}
       />
       <div className="relative">
-        <Icon 
-          className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-300 ${
-            isFocused ? 'text-primary' : 'text-muted-foreground'
-          }`} 
+        <Icon
+          className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-300 ${isFocused ? 'text-primary' : 'text-muted-foreground'
+            }`}
         />
         <input
           {...props}
@@ -137,9 +140,8 @@ function AnimatedInput({ icon: Icon, error, ...props }) {
             setIsFocused(false)
             props.onBlur?.(e)
           }}
-          className={`w-full h-14 pl-12 pr-4 rounded-xl border bg-card/50 backdrop-blur-sm text-foreground placeholder:text-muted-foreground transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary ${
-            error ? 'border-destructive' : 'border-border hover:border-primary/50'
-          }`}
+          className={`w-full h-14 pl-12 pr-4 rounded-xl border bg-card/50 backdrop-blur-sm text-foreground placeholder:text-muted-foreground transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary ${error ? 'border-destructive' : 'border-border hover:border-primary/50'
+            }`}
         />
       </div>
     </motion.div>
@@ -176,6 +178,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [hoveredButton, setHoveredButton] = useState(null)
 
+  // Set theme to dark on login page for better visual
+  const { setTheme } = useUIStore()
+  useEffect(() => {
+    // Optional: force dark mode on login page if desired
+    // setTheme('dark')
+  }, [])
+
   const {
     register,
     handleSubmit,
@@ -196,14 +205,14 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     setIsLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 1000))
-    
+
     const demoAccount = demoAccounts.find((acc) => acc.email === data.email)
     if (demoAccount && demoAccount.password === data.password) {
       login({
         email: data.email,
-        name: demoAccount.role === 'Administrator' ? 'Dr. Sarah Chen' : 
-              demoAccount.role === 'Technician' ? 'James Wilson' : 
-              'Dr. Michael Ross',
+        name: demoAccount.role === 'Administrator' ? 'Dr. Sarah Chen' :
+          demoAccount.role === 'Technician' ? 'James Wilson' :
+            'Dr. Michael Ross',
         role: demoAccount.role,
       })
       toast.success('Login successful!')
@@ -219,9 +228,9 @@ export default function LoginPage() {
     setTimeout(() => {
       login({
         email: account.email,
-        name: account.role === 'Administrator' ? 'Dr. Sarah Chen' : 
-              account.role === 'Technician' ? 'James Wilson' : 
-              'Dr. Michael Ross',
+        name: account.role === 'Administrator' ? 'Dr. Sarah Chen' :
+          account.role === 'Technician' ? 'James Wilson' :
+            'Dr. Michael Ross',
         role: account.role,
       })
       toast.success(`Logged in as ${account.role}`)
@@ -233,13 +242,13 @@ export default function LoginPage() {
   const getRoleIcon = (role) => {
     switch (role) {
       case 'Administrator':
-        return Shield
+        return AdminRoleIcon
       case 'Technician':
-        return Stethoscope
+        return TechRoleIcon
       case 'Radiologist':
-        return Eye
+        return RadRoleIcon
       default:
-        return Users
+        return UsersIcon
     }
   }
 
@@ -262,7 +271,7 @@ export default function LoginPage() {
       <div className="absolute inset-0 overflow-hidden">
         {/* Base gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
-        
+
         {/* Animated mesh gradient */}
         <motion.div
           className="absolute inset-0 opacity-50"
@@ -278,14 +287,14 @@ export default function LoginPage() {
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
-        
+
         {/* Floating Orbs */}
         {orbs.map((orb, index) => (
           <FloatingOrb key={index} {...orb} />
         ))}
-        
+
         {/* Grid pattern overlay */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.015]"
           style={{
             backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
@@ -294,7 +303,7 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* Left Side - Branding */}
+      {/* Left Side - Branding (Hidden on Mobile) */}
       <motion.div
         initial={{ opacity: 0, x: -100 }}
         animate={{ opacity: 1, x: 0 }}
@@ -310,36 +319,15 @@ export default function LoginPage() {
             className="space-y-4"
           >
             {/* Animated Logo */}
-            <motion.div 
-              className="relative inline-flex items-center gap-4"
+            <motion.div
+              className="relative inline-flex items-center"
               whileHover={{ scale: 1.02 }}
             >
-              <div className="relative">
-                <motion.div
-                  className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center"
-                  animate={{ 
-                    boxShadow: [
-                      '0 0 20px hsl(217, 91%, 60%, 0.3)',
-                      '0 0 40px hsl(217, 91%, 60%, 0.5)',
-                      '0 0 20px hsl(217, 91%, 60%, 0.3)',
-                    ]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Activity className="h-8 w-8 text-white" />
-                </motion.div>
-                <PulseRing />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-foreground xl:text-5xl">
-                  MedFlow
-                </h1>
-                <span className="text-xl text-primary font-semibold">Monitor</span>
-              </div>
+              <Logo className="h-16 w-auto" />
             </motion.div>
 
             {/* Tagline with typewriter effect simulation */}
-            <motion.p 
+            <motion.p
               className="text-xl text-muted-foreground max-w-md"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -351,31 +339,31 @@ export default function LoginPage() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
-            <StatsCard 
-              icon={Activity} 
-              value="99.9%" 
-              label="System Uptime" 
+            <StatsCard
+              icon={ActivityIcon}
+              value="99.9%"
+              label="System Uptime"
               delay={0.4}
               color="hsl(217, 91%, 60%)"
             />
-            <StatsCard 
-              icon={TrendingUp} 
-              value="101" 
-              label="Studies Today" 
+            <StatsCard
+              icon={TrendingUpIcon}
+              value="101"
+              label="Studies Today"
               delay={0.5}
               color="hsl(142, 71%, 45%)"
             />
-            <StatsCard 
-              icon={Users} 
-              value="4" 
-              label="Active Users" 
+            <StatsCard
+              icon={UsersIcon}
+              value="4"
+              label="Active Users"
               delay={0.6}
               color="hsl(280, 60%, 50%)"
             />
-            <StatsCard 
-              icon={FileText} 
-              value="23" 
-              label="Reports Generated" 
+            <StatsCard
+              icon={ReportsIcon}
+              value="23"
+              label="Reports Generated"
               delay={0.7}
               color="hsl(35, 91%, 55%)"
             />
@@ -388,32 +376,26 @@ export default function LoginPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
           >
-            <Heart className="h-4 w-4 text-destructive animate-pulse" />
+            <HeartIcon className="h-4 w-4 text-destructive animate-pulse" />
             <span className="text-sm">Trusted by healthcare professionals worldwide</span>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Right Side - Login Form */}
+      {/* Right Side - Login Form (Full width on mobile) */}
       <motion.div
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative flex w-full flex-col items-center justify-center p-6 lg:w-1/2 lg:p-12"
+        className="relative flex w-full flex-col items-center justify-center p-6 lg:w-1/2 lg:p-12 overflow-y-auto"
       >
         {/* Mobile logo */}
-        <motion.div 
-          className="mb-8 flex items-center gap-3 lg:hidden"
+        <motion.div
+          className="mb-8 flex items-center justify-center lg:hidden"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
-            <Activity className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">MedFlow</h1>
-            <span className="text-sm text-primary font-semibold">Monitor</span>
-          </div>
+          <Logo className="h-12 w-auto" />
         </motion.div>
 
         {/* Login Card */}
@@ -424,12 +406,12 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           {/* Glassmorphism Card */}
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/30 p-8 backdrop-blur-xl shadow-2xl">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/30 p-6 md:p-8 backdrop-blur-xl shadow-2xl">
             {/* Card glow effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
-            
+
             {/* Top decorative line */}
-            <motion.div 
+            <motion.div
               className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
@@ -461,7 +443,7 @@ export default function LoginPage() {
                     Email Address
                   </Label>
                   <AnimatedInput
-                    icon={Mail}
+                    icon={MailIcon}
                     id="email"
                     type="email"
                     placeholder="admin@hospital.com"
@@ -469,7 +451,7 @@ export default function LoginPage() {
                     {...register('email')}
                   />
                   {errors.email && (
-                    <motion.p 
+                    <motion.p
                       className="text-sm text-destructive"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -490,7 +472,7 @@ export default function LoginPage() {
                   </Label>
                   <div className="relative">
                     <AnimatedInput
-                      icon={Lock}
+                      icon={LockIcon}
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -502,11 +484,11 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <motion.p 
+                    <motion.p
                       className="text-sm text-destructive"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -522,8 +504,8 @@ export default function LoginPage() {
                   transition={{ delay: 0.7 }}
                   className="flex items-center justify-end"
                 >
-                  <a 
-                    href="#" 
+                  <a
+                    href="#"
                     className="text-sm text-primary hover:text-primary/80 transition-colors hover:underline"
                   >
                     Forgot password?
@@ -535,20 +517,20 @@ export default function LoginPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
                 >
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-14 text-base font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <LoaderIcon className="h-5 w-5" />
                         Signing in...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
                         Sign In
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRightIcon className="h-5 w-5" />
                       </span>
                     )}
                   </Button>
@@ -556,7 +538,7 @@ export default function LoginPage() {
               </form>
 
               {/* Divider */}
-              <motion.div 
+              <motion.div
                 className="relative"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -567,9 +549,9 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-card/50 backdrop-blur-sm px-4 text-muted-foreground flex items-center gap-2">
-                    <Sparkles className="h-3 w-3" />
+                    <SparklesIcon className="h-3 w-3" />
                     Quick Demo Access
-                    <Sparkles className="h-3 w-3" />
+                    <SparklesIcon className="h-3 w-3" />
                   </span>
                 </div>
               </motion.div>
@@ -579,7 +561,7 @@ export default function LoginPage() {
                 {demoAccounts.map((account, index) => {
                   const RoleIcon = getRoleIcon(account.role)
                   const roleColor = getRoleColor(account.role)
-                  
+
                   return (
                     <motion.div
                       key={account.email}
@@ -600,22 +582,22 @@ export default function LoginPage() {
                         {/* Hover gradient */}
                         <motion.div
                           className="absolute inset-0"
-                          style={{ 
-                            background: `linear-gradient(90deg, ${roleColor}10, ${roleColor}05)` 
+                          style={{
+                            background: `linear-gradient(90deg, ${roleColor}10, ${roleColor}05)`
                           }}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: hoveredButton === account.role ? 1 : 0 }}
                           transition={{ duration: 0.2 }}
                         />
-                        
+
                         <div className="relative flex items-center justify-center gap-3">
-                          <RoleIcon 
-                            className="h-5 w-5 transition-colors duration-300" 
+                          <RoleIcon
+                            className="h-5 w-5 transition-colors duration-300"
                             style={{ color: hoveredButton === account.role ? roleColor : 'hsl(var(--muted-foreground))' }}
                           />
                           <span className="font-medium text-foreground">{account.role}</span>
-                          <ChevronRight 
-                            className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:translate-x-1" 
+                          <ChevronRightIcon
+                            className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:translate-x-1"
                           />
                         </div>
                       </motion.button>
@@ -637,7 +619,25 @@ export default function LoginPage() {
           </motion.p>
         </motion.div>
       </motion.div>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            padding: '12px 16px',
+            fontSize: '14px',
+            maxWidth: '360px',
+          },
+          classNames: {
+            toast: 'bg-card border-border text-foreground',
+            success: 'bg-success/10 border-success/30 text-success',
+            error: 'bg-destructive/10 border-destructive/30 text-destructive',
+            warning: 'bg-warning/10 border-warning/30 text-warning',
+          },
+        }}
+        richColors
+        closeButton
+      />
     </div>
   )
 }
-

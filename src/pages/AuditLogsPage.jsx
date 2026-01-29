@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, LogIn, LogOut, Eye, ExternalLink, Download } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { DataLoader } from '@/components/ui/DataLoader'
 import { mockAuditLogs } from '@/mock/mockAuditLogs'
 import { AUDIT_ACTIONS } from '@/utils/constants'
 
@@ -35,8 +36,17 @@ const getActionColor = (action) => {
 }
 
 export default function AuditLogsPage() {
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [actionFilter, setActionFilter] = useState('all')
+
+  // Initial loading delay for mock data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const filteredLogs = useMemo(() => {
     return mockAuditLogs.filter((log) => {
@@ -49,6 +59,15 @@ export default function AuditLogsPage() {
     })
   }, [searchQuery, actionFilter])
 
+  // Show loader while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DataLoader message="Loading audit logs..." />
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -56,8 +75,8 @@ export default function AuditLogsPage() {
       className="space-y-6"
     >
       <div>
-        <h1 className="text-3xl font-bold">Audit Logs</h1>
-        <p className="text-muted-foreground">Monitor user activities and system events</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Audit Logs</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Monitor user activities and system events</p>
       </div>
 
       {/* Filters */}
@@ -111,27 +130,25 @@ export default function AuditLogsPage() {
                   className="relative flex gap-4"
                 >
                   <div className="flex flex-col items-center">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                      getActionColor(log.action) === 'success' ? 'bg-success/20' :
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full ${getActionColor(log.action) === 'success' ? 'bg-success/20' :
                       getActionColor(log.action) === 'default' ? 'bg-primary/20' :
-                      getActionColor(log.action) === 'secondary' ? 'bg-secondary/20' :
-                      getActionColor(log.action) === 'accent' ? 'bg-accent/20' :
-                      'bg-muted/20'
-                    }`}>
-                      <Icon className={`h-5 w-5 ${
-                        getActionColor(log.action) === 'success' ? 'text-success' :
+                        getActionColor(log.action) === 'secondary' ? 'bg-secondary/20' :
+                          getActionColor(log.action) === 'accent' ? 'bg-accent/20' :
+                            'bg-muted/20'
+                      }`}>
+                      <Icon className={`h-5 w-5 ${getActionColor(log.action) === 'success' ? 'text-success' :
                         getActionColor(log.action) === 'default' ? 'text-primary' :
-                        getActionColor(log.action) === 'secondary' ? 'text-secondary' :
-                        getActionColor(log.action) === 'accent' ? 'text-accent' :
-                        'text-muted-foreground'
-                      }`} />
+                          getActionColor(log.action) === 'secondary' ? 'text-secondary' :
+                            getActionColor(log.action) === 'accent' ? 'text-accent' :
+                              'text-muted-foreground'
+                        }`} />
                     </div>
                     {index < filteredLogs.length - 1 && (
                       <div className="mt-2 h-12 w-0.5 bg-border" />
                     )}
                   </div>
-                  <div className="flex-1 pb-6">
-                    <div className="flex items-start justify-between">
+                  <div className="flex-1 pb-4 sm:pb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{log.user}</p>

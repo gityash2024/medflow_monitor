@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Search, Eye, Download } from 'lucide-react'
@@ -13,15 +13,25 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DataLoader } from '@/components/ui/DataLoader'
 import { mockStudies } from '@/mock/mockStudies'
 import { MODALITIES, STUDY_STATUSES } from '@/utils/constants'
 import { format } from 'date-fns'
 
 export default function StudiesPage() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [modalityFilter, setModalityFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+
+  // Initial loading delay for mock data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const filteredStudies = useMemo(() => {
     return mockStudies.filter((study) => {
@@ -60,6 +70,15 @@ export default function StudiesPage() {
     return colors[modality] || 'outline'
   }
 
+  // Show loader while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DataLoader message="Loading studies..." />
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,8 +86,8 @@ export default function StudiesPage() {
       className="space-y-6"
     >
       <div>
-        <h1 className="text-3xl font-bold">Studies</h1>
-        <p className="text-muted-foreground">View and manage all DICOM studies</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Studies</h1>
+        <p className="text-sm md:text-base text-muted-foreground">View and manage all DICOM studies</p>
       </div>
 
       {/* Filters */}
@@ -135,9 +154,9 @@ export default function StudiesPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="flex items-center justify-between rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-4 hover:bg-white/10 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 md:p-4 hover:bg-white/10 transition-colors"
                 >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <Badge variant={getModalityColor(study.modality)}>
                       {study.modality}
                     </Badge>
@@ -150,14 +169,14 @@ export default function StudiesPage() {
                         Patient ID: {study.patientID}
                       </p>
                     </div>
-                    <div className="text-xs text-muted-foreground whitespace-nowrap">
+                    <div className="text-xs text-muted-foreground whitespace-nowrap hidden md:block">
                       {format(new Date(study.date), 'MMM dd, yyyy HH:mm')}
                     </div>
                     <Badge variant={getStatusColor(study.status)}>
                       {study.status}
                     </Badge>
                     {study.duration && (
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">
+                      <div className="text-xs text-muted-foreground whitespace-nowrap hidden lg:block">
                         {study.duration}
                       </div>
                     )}
@@ -185,5 +204,6 @@ export default function StudiesPage() {
     </motion.div>
   )
 }
+
 
 

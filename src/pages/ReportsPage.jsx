@@ -1,14 +1,24 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Eye, Download } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DataLoader } from '@/components/ui/DataLoader'
 import { mockReports } from '@/mock/mockReports'
 
 export default function ReportsPage() {
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Initial loading delay for mock data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const filteredReports = useMemo(() => {
     return mockReports.filter((report) => {
@@ -32,6 +42,15 @@ export default function ReportsPage() {
     return colors[modality] || 'outline'
   }
 
+  // Show loader while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DataLoader message="Loading reports..." />
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,8 +58,8 @@ export default function ReportsPage() {
       className="space-y-6"
     >
       <div>
-        <h1 className="text-3xl font-bold">Reports</h1>
-        <p className="text-muted-foreground">View and download generated reports</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Reports</h1>
+        <p className="text-sm md:text-base text-muted-foreground">View and download generated reports</p>
       </div>
 
       {/* Search */}
@@ -76,9 +95,9 @@ export default function ReportsPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="flex items-center justify-between rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-4 hover:bg-white/10 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 md:p-4 hover:bg-white/10 transition-colors"
                 >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <Badge variant={getModalityColor(report.modality)}>
                       {report.modality}
                     </Badge>
@@ -91,7 +110,7 @@ export default function ReportsPage() {
                         Patient ID: {report.patientID}
                       </p>
                     </div>
-                    <div className="text-xs text-muted-foreground whitespace-nowrap">
+                    <div className="text-xs text-muted-foreground whitespace-nowrap hidden sm:block">
                       {report.generated}
                     </div>
                     <div className="flex items-center gap-2">
@@ -112,5 +131,6 @@ export default function ReportsPage() {
     </motion.div>
   )
 }
+
 
 

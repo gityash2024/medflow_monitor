@@ -26,6 +26,14 @@ const saveThemeToStorage = (theme) => {
   }
 }
 
+// Check if viewport is mobile (< 768px)
+const checkIsMobile = () => {
+  if (typeof window !== 'undefined') {
+    return window.innerWidth < 768
+  }
+  return false
+}
+
 // Initialize theme on load
 if (typeof window !== 'undefined') {
   const theme = loadThemeFromStorage()
@@ -36,9 +44,15 @@ export const useUIStore = create((set) => ({
   sidebarOpen: false,
   sidebarPinned: false, // Track if user manually pinned the sidebar
   theme: loadThemeFromStorage(),
+  isMobile: checkIsMobile(),
+  mobileMenuOpen: false,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarPinned: (pinned) => set({ sidebarPinned: pinned }),
+  setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
+  toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
+  closeMobileMenu: () => set({ mobileMenuOpen: false }),
+  setIsMobile: (isMobile) => set({ isMobile }),
   toggleTheme: () => {
     set((state) => {
       const newTheme = state.theme === 'dark' ? 'light' : 'dark'

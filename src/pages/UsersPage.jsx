@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Plus, MoreVertical, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { DataLoader } from '@/components/ui/DataLoader'
 import { mockUsers } from '@/mock/mockUsers'
 import { USER_STATUSES, ROLES } from '@/utils/constants'
 import { useForm } from 'react-hook-form'
@@ -34,11 +35,20 @@ const userSchema = z.object({
 })
 
 export default function UsersPage() {
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [users, setUsers] = useState(mockUsers)
+
+  // Initial loading delay for mock data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const {
     register,
@@ -100,18 +110,27 @@ export default function UsersPage() {
     return status === 'Active' ? 'success' : 'outline'
   }
 
+  // Show loader while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DataLoader message="Loading users..." />
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Users</h1>
-          <p className="text-muted-foreground">Manage system users and permissions</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Users</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Manage system users and permissions</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Add User
         </Button>
@@ -173,9 +192,9 @@ export default function UsersPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.02 }}
-                className="flex items-center justify-between rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-4 hover:bg-white/10 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 md:p-4 hover:bg-white/10 transition-colors"
               >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
                   <Avatar>
                     <AvatarFallback>{user.avatar}</AvatarFallback>
                   </Avatar>
@@ -184,11 +203,11 @@ export default function UsersPage() {
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <Badge variant={getRoleColor(user.role)}>{user.role}</Badge>
-                  <Badge variant={getStatusColor(user.status)}>{user.status}</Badge>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  <Badge variant={getStatusColor(user.status)} className="hidden sm:inline-flex">{user.status}</Badge>
+                  <div className="text-xs text-muted-foreground whitespace-nowrap hidden md:block">
                     Created: {user.created}
                   </div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  <div className="text-xs text-muted-foreground whitespace-nowrap hidden lg:block">
                     Last Login: {user.lastLogin}
                   </div>
                   <DropdownMenu>
@@ -226,7 +245,7 @@ export default function UsersPage() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 z-50 h-full w-full max-w-md bg-card border-l border-border shadow-lg"
+              className="fixed right-0 top-0 z-50 h-full w-full sm:max-w-md bg-card border-l border-border shadow-lg"
             >
               <div className="flex h-full flex-col">
                 <div className="flex items-center justify-between border-b border-border p-6">
