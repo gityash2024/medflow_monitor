@@ -44,8 +44,8 @@ export default function ViewerPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <Button onClick={() => navigate('/studies')} size="lg">
-                Go to Studies
+              <Button onClick={() => navigate('/viewer/mock')} size="lg">
+                View
               </Button>
             </motion.div>
             <motion.div

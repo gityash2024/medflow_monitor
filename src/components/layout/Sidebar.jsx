@@ -36,7 +36,16 @@ import {
   AuditIcon,
   SettingsIcon,
   CloseIcon,
+  AlertCircleIcon,
 } from '@/components/ui/Icons'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const menuItems = [
   { icon: DashboardIcon, label: 'Dashboard', path: '/dashboard' },
@@ -64,6 +73,7 @@ export function Sidebar() {
   } = useUIStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false)
 
   // For mobile, use mobileMenuOpen; for desktop, use sidebarOpen
   const isOpen = isMobile ? mobileMenuOpen : sidebarOpen
@@ -80,7 +90,12 @@ export function Sidebar() {
     }
   }
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirmation(true)
+  }
+
+  const confirmLogout = () => {
+    setShowLogoutConfirmation(false)
     logout()
     closeMobileMenu()
     navigate('/login')
@@ -226,7 +241,7 @@ export function Sidebar() {
                     </div>
                   </div>
                   <Button
-                    onClick={handleLogout}
+                    onClick={handleLogoutClick}
                     variant="ghost"
                     className="w-full mt-3 justify-start text-destructive hover:bg-destructive/10"
                   >
@@ -488,7 +503,7 @@ export function Sidebar() {
                             </button>
                             <Separator className="my-1" />
                             <button
-                              onClick={handleLogout}
+                              onClick={handleLogoutClick}
                               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer text-destructive"
                             >
                               <LogOut className="h-4 w-4" />
@@ -587,7 +602,7 @@ export function Sidebar() {
                           </button>
                           <Separator className="my-1" />
                           <button
-                            onClick={handleLogout}
+                            onClick={handleLogoutClick}
                             className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer text-destructive"
                           >
                             <LogOut className="h-4 w-4" />
@@ -603,6 +618,31 @@ export function Sidebar() {
           </div>
         </motion.aside>
       )}
+
+      <Dialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out? You will need to sign in again to access the application.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowLogoutConfirmation(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmLogout}
+            >
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   )
 }

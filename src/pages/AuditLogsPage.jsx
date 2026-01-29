@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, LogIn, LogOut, Eye, ExternalLink, Download } from 'lucide-react'
+import { Search, LogIn, LogOut, Eye, ExternalLink, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -11,19 +11,16 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button' // Added import
 import { DataLoader } from '@/components/ui/DataLoader'
 import { mockAuditLogs } from '@/mock/mockAuditLogs'
 import { AUDIT_ACTIONS } from '@/utils/constants'
 
-const getActionIcon = (iconName) => {
-  const icons = {
-    'log-in': LogIn,
-    'log-out': LogOut,
-    eye: Eye,
-    'external-link': ExternalLink,
-    download: Download,
-  }
-  return icons[iconName] || Eye
+// Styles for the modern table
+const tableStyles = {
+  header: "text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-4",
+  cell: "py-3 px-4 text-sm border-b border-border/50",
+  row: "hover:bg-muted/50 transition-colors"
 }
 
 const getActionColor = (action) => {
@@ -39,6 +36,8 @@ export default function AuditLogsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [actionFilter, setActionFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
 
   // Initial loading delay for mock data
   useEffect(() => {
@@ -58,6 +57,17 @@ export default function AuditLogsPage() {
       return matchesSearch && matchesAction
     })
   }, [searchQuery, actionFilter])
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage)
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
 
   // Show loader while loading
   if (isLoading) {
@@ -89,10 +99,16 @@ export default function AuditLogsPage() {
                 placeholder="Search by user or resource..."
                 className="pl-10"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(1) // Reset to page 1 on search
+                }}
               />
             </div>
-            <Select value={actionFilter} onValueChange={setActionFilter}>
+            <Select value={actionFilter} onValueChange={(val) => {
+              setActionFilter(val)
+              setCurrentPage(1) // Reset to page 1 on filter
+            }}>
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="All Actions" />
               </SelectTrigger>
@@ -106,77 +122,125 @@ export default function AuditLogsPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Showing {filteredLogs.length} of {mockAuditLogs.length} events
-          </div>
         </CardContent>
       </Card>
 
-      {/* Timeline */}
+      {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Activity Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {filteredLogs.map((log, index) => {
-              const Icon = getActionIcon(log.icon)
-              return (
-                <motion.div
-                  key={log.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="relative flex gap-4"
-                >
-                  <div className="flex flex-col items-center">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full ${getActionColor(log.action) === 'success' ? 'bg-success/20' :
-                      getActionColor(log.action) === 'default' ? 'bg-primary/20' :
-                        getActionColor(log.action) === 'secondary' ? 'bg-secondary/20' :
-                          getActionColor(log.action) === 'accent' ? 'bg-accent/20' :
-                            'bg-muted/20'
-                      }`}>
-                      <Icon className={`h-5 w-5 ${getActionColor(log.action) === 'success' ? 'text-success' :
-                        getActionColor(log.action) === 'default' ? 'text-primary' :
-                          getActionColor(log.action) === 'secondary' ? 'text-secondary' :
-                            getActionColor(log.action) === 'accent' ? 'text-accent' :
-                              'text-muted-foreground'
-                        }`} />
-                    </div>
-                    {index < filteredLogs.length - 1 && (
-                      <div className="mt-2 h-12 w-0.5 bg-border" />
-                    )}
-                  </div>
-                  <div className="flex-1 pb-4 sm:pb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{log.user}</p>
-                          <Badge variant={getActionColor(log.action)}>
-                            {log.action}
-                          </Badge>
-                        </div>
-                        {log.resource && (
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Resource: {log.resource}
-                          </p>
-                        )}
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          IP: {log.ip}
-                        </p>
-                      </div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">
-                        {log.timestamp}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
+          <div className="flex items-center justify-between">
+            <CardTitle>System Activity</CardTitle>
+            <div className="text-sm text-muted-foreground">
+              Showing {paginatedLogs.length} of {filteredLogs.length} events
+            </div>
           </div>
+        </CardHeader>
+        <CardContent className="p-0 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-muted/50 border-b border-border">
+                  <th className={tableStyles.header}>User</th>
+                  <th className={tableStyles.header}>Action</th>
+                  <th className={tableStyles.header}>Resource</th>
+                  <th className={tableStyles.header}>IP Address</th>
+                  <th className={tableStyles.header}>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="p-8 text-center text-muted-foreground">
+                      No logs found matching your criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedLogs.map((log, index) => (
+                    <motion.tr
+                      key={log.id}
+                      className={tableStyles.row}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <td className={tableStyles.cell}>
+                        <div className="font-medium">{log.user}</div>
+                      </td>
+                      <td className={tableStyles.cell}>
+                        <Badge variant={getActionColor(log.action)} className="font-normal text-xs">
+                          {log.action}
+                        </Badge>
+                      </td>
+                      <td className={tableStyles.cell}>
+                        <span className="text-muted-foreground font-mono text-xs">{log.resource || '-'}</span>
+                      </td>
+                      <td className={tableStyles.cell}>
+                        <span className="font-mono text-xs">{log.ip}</span>
+                      </td>
+                      <td className={tableStyles.cell}>
+                        <span className="text-muted-foreground text-xs whitespace-nowrap">{log.timestamp}</span>
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-4 border-t border-border">
+              <div className="flex-1 text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                  className="h-8 w-8"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="h-8 w-8"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {/* Simple logic: show current page num */}
+                <Button variant="ghost" size="sm" className="h-8 pointer-events-none">
+                  {currentPage}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="h-8 w-8"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="h-8 w-8"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
   )
 }
-

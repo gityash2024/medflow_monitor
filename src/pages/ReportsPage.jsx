@@ -6,11 +6,85 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataLoader } from '@/components/ui/DataLoader'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { mockReports } from '@/mock/mockReports'
+
+const SAMPLE_REPORT_HTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .patient-info { background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .section { margin-bottom: 20px; }
+        h2 { color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 0.9em; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RADIOLOGY REPORT</h1>
+        <p><strong>Medical Imaging Center</strong></p>
+    </div>
+    
+    <div class="patient-info">
+        <div><strong>Patient Name:</strong> John Doe</div>
+        <div><strong>Patient ID:</strong> P-12345678</div>
+        <div><strong>Exam Date:</strong> Oct 26, 2025</div>
+        <div><strong>Modality:</strong> CT Scan</div>
+    </div>
+
+    <div class="section">
+        <h2>Clinical History</h2>
+        <p>Persistent headache for 2 weeks. Rule out intracranial pathology.</p>
+    </div>
+
+    <div class="section">
+        <h2>Technique</h2>
+        <p>Axial CT images of the brain were obtained without contrast administration.</p>
+    </div>
+
+    <div class="section">
+        <h2>Findings</h2>
+        <p>The ventricles and sulci are normal in size and configuration for the patient's age. There is no evidence of intracranial hemorrhage, mass effect, or midline shift. The grey-white matter differentiation is preserved. No osseous abnormalities are identified.</p>
+    </div>
+
+    <div class="section">
+        <h2>Impression</h2>
+        <p>Normal CT Brain. No acute intracranial abnormality identified.</p>
+    </div>
+
+    <div class="footer">
+        <p>Electronically signed by: Dr. Sarah Chen, MD</p>
+    </div>
+</body>
+</html>
+`
 
 export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedReport, setSelectedReport] = useState(null)
+
+  const handleViewReport = (report) => {
+    setSelectedReport(report)
+  }
+
+  const handleDownloadReport = (report) => {
+    const element = document.createElement("a");
+    const file = new Blob([SAMPLE_REPORT_HTML], { type: 'text/html' });
+    element.href = URL.createObjectURL(file);
+    element.download = `report_${report.reportFilename}.html`;
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+    document.body.removeChild(element);
+  }
 
   // Initial loading delay for mock data
   useEffect(() => {
@@ -114,10 +188,10 @@ export default function ReportsPage() {
                       {report.generated}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleViewReport(report)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleDownloadReport(report)}>
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
@@ -128,6 +202,21 @@ export default function ReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
+        <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Report Preview</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto border rounded-md p-4 bg-white">
+            <iframe
+              srcDoc={SAMPLE_REPORT_HTML}
+              className="w-full h-full border-none"
+              title="Report Preview"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }
