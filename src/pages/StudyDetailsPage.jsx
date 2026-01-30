@@ -94,7 +94,7 @@ export default function StudyDetailsPage() {
             </Button>
           )}
           {details.status === 'completed' && (
-            <Button className="flex-1 sm:flex-none" onClick={() => navigate(`/viewer/mock?study=${details.studyUID}`)}>
+            <Button className="flex-1 sm:flex-none" onClick={() => window.open(`/viewer/mock?study=${details.studyUID}`, '_blank')}>
               <ExternalLink className="mr-2 h-4 w-4" />
               Open Viewer
             </Button>
@@ -257,7 +257,7 @@ export default function StudyDetailsPage() {
                 <p className="mb-6 text-muted-foreground">
                   Select a study from the Studies page to view it in the integrated high-performance DICOM viewer
                 </p>
-                <Button onClick={() => navigate(`/viewer/mock?study=${details.studyUID}`)}>
+                <Button onClick={() => window.open(`/viewer/mock?study=${details.studyUID}`, '_blank')}>
                   Launch Viewer
                 </Button>
                 <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">

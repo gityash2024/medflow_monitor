@@ -56,9 +56,7 @@ function App() {
             path="/viewer/mock"
             element={
               <ProtectedRoute>
-                <Layout>
-                  <MockViewerPage />
-                </Layout>
+                <MockViewerPage />
               </ProtectedRoute>
             }
           />

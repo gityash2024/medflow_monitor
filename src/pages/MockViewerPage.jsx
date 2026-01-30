@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Activity, Calendar, User, Monitor, Layout, Maximize2, Minimize2, ZoomIn, Move, Sun } from 'lucide-react'
+import { Activity, Calendar, User, Layout, Maximize2, Minimize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -52,9 +52,6 @@ export default function MockViewerPage() {
           >
             <div className="w-[320px] h-full flex flex-col"> {/* Fixed width content container to prevent content squish during anim */}
               <div className="p-4 border-b border-slate-800 flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
                 <div className="overflow-hidden">
                   <h2 className="font-semibold truncate">Study Viewer</h2>
                   <p className="text-xs text-muted-foreground truncate">{studyId || 'Demo Study'}</p>
@@ -148,40 +145,6 @@ export default function MockViewerPage() {
             <Layout className="h-5 w-5" />
           </Button>
           <div className="w-px h-5 bg-slate-700 mx-2" />
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-9 w-9 rounded-full ${activeTool === 'Wwwc' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-400 hover:text-white'}`}
-            onClick={() => setActiveTool('Wwwc')}
-            title="Levels (Window/Width)"
-          >
-            <Sun className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-9 w-9 rounded-full ${activeTool === 'Pan' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-400 hover:text-white'}`}
-            onClick={() => setActiveTool('Pan')}
-            title="Pan"
-          >
-            <Move className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-9 w-9 rounded-full ${activeTool === 'Zoom' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-400 hover:text-white'}`}
-            onClick={() => setActiveTool('Zoom')}
-            title="Zoom"
-          >
-            <ZoomIn className="h-5 w-5" />
-          </Button>
-
-          <div className="w-px h-5 bg-slate-700 mx-2" />
-
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-400 hover:text-white" title="Layout 1x1">
-            <Monitor className="h-5 w-5" />
-          </Button>
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-400 hover:text-white" title="Maximize" onClick={toggleFullscreen}>
             {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
           </Button>

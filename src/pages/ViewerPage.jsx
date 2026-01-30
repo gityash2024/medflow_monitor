@@ -55,7 +55,7 @@ export default function ViewerPage() {
               <Card
                 key={name}
                 className="group cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg overflow-hidden border-slate-700 bg-slate-800/50"
-                onClick={() => navigate(`/viewer/mock?study=DEMO-001&index=${index}`)}
+                onClick={() => window.open(`/viewer/mock?study=DEMO-001&index=${index}`, '_blank')}
               >
                 <CardContent className="p-0">
                   <div className="aspect-square bg-slate-900 flex items-center justify-center relative group-hover:bg-slate-800 transition-colors">
