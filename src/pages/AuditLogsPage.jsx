@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, LogIn, LogOut, Eye, ExternalLink, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { Search, LogIn, LogOut, Eye, ExternalLink, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Copy } from 'lucide-react'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -67,6 +68,15 @@ export default function AuditLogsPage() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page)
+  }
+
+  const handleCopyIP = async (ipAddress) => {
+    try {
+      await navigator.clipboard.writeText(ipAddress)
+      toast.success(`IP address ${ipAddress} copied to clipboard`)
+    } catch (err) {
+      toast.error('Failed to copy IP address')
+    }
   }
 
   // Show loader while loading
@@ -175,7 +185,16 @@ export default function AuditLogsPage() {
                         <span className="text-muted-foreground font-mono text-xs">{log.resource || '-'}</span>
                       </td>
                       <td className={tableStyles.cell}>
-                        <span className="font-mono text-xs">{log.ip}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs">{log.ip}</span>
+                          <button
+                            onClick={() => handleCopyIP(log.ip)}
+                            className="p-1 hover:bg-muted/50 rounded transition-colors cursor-pointer"
+                            title="Copy IP address"
+                          >
+                            <Copy className="h-3.5 w-3.5" style={{ color: '#be5b6f' }} />
+                          </button>
+                        </div>
                       </td>
                       <td className={tableStyles.cell}>
                         <span className="text-muted-foreground text-xs whitespace-nowrap">{log.timestamp}</span>

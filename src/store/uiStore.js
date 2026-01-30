@@ -43,12 +43,15 @@ if (typeof window !== 'undefined') {
 export const useUIStore = create((set) => ({
   sidebarOpen: false,
   sidebarPinned: false, // Track if user manually pinned the sidebar
+  sidebarHoverFrozen: false, // Track if sidebar is frozen via hover click
   theme: loadThemeFromStorage(),
   isMobile: checkIsMobile(),
   mobileMenuOpen: false,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarPinned: (pinned) => set({ sidebarPinned: pinned }),
+  setSidebarHoverFrozen: (frozen) => set({ sidebarHoverFrozen: frozen }),
+  toggleSidebarHoverFrozen: () => set((state) => ({ sidebarHoverFrozen: !state.sidebarHoverFrozen })),
   setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
   toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
   closeMobileMenu: () => set({ mobileMenuOpen: false }),

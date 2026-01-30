@@ -261,7 +261,8 @@ export default function DashboardPage() {
               {recentStudies.map((study) => (
                 <div
                   key={study.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 hover:bg-white/10 transition-colors"
+                  onClick={() => navigate(`/studies/${study.id}`)}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-black/10 dark:border-white/20 bg-card/30 backdrop-blur-sm p-3 cursor-pointer hover:bg-white/10 transition-colors"
                 >
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1">
                     <Badge variant={getModalityColor(study.modality)}>
@@ -288,7 +289,10 @@ export default function DashboardPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate(`/studies/${study.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(`/studies/${study.id}`)
+                        }}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>

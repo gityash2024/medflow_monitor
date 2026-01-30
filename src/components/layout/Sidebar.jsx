@@ -64,9 +64,12 @@ export function Sidebar() {
   const {
     sidebarOpen,
     sidebarPinned,
+    sidebarHoverFrozen,
     toggleSidebar,
     setSidebarOpen,
     setSidebarPinned,
+    setSidebarHoverFrozen,
+    toggleSidebarHoverFrozen,
     isMobile,
     mobileMenuOpen,
     closeMobileMenu
@@ -74,18 +77,34 @@ export function Sidebar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   // For mobile, use mobileMenuOpen; for desktop, use sidebarOpen
   const isOpen = isMobile ? mobileMenuOpen : sidebarOpen
 
   const handleMouseEnter = () => {
-    if (!isMobile && !sidebarPinned) {
-      setSidebarOpen(true)
+    if (!isMobile) {
+      setIsHovered(true)
+      if (!sidebarPinned) {
+        setSidebarOpen(true)
+      }
     }
   }
 
   const handleMouseLeave = () => {
-    if (!isMobile && !sidebarPinned) {
+    setIsHovered(false)
+    // Only collapse if not pinned and not frozen
+    if (!isMobile && !sidebarPinned && !sidebarHoverFrozen) {
+      setSidebarOpen(false)
+    }
+  }
+
+  const handleFreezeToggle = (e) => {
+    e.stopPropagation()
+    const willBeFrozen = !sidebarHoverFrozen
+    toggleSidebarHoverFrozen()
+    // If unfreezing and sidebar is not pinned and not hovered, collapse it
+    if (!willBeFrozen && !sidebarPinned && !isHovered) {
       setSidebarOpen(false)
     }
   }
@@ -266,23 +285,51 @@ export function Sidebar() {
         >
           <div className="flex h-full flex-col">
             {/* Header */}
-            <div className="flex h-16 items-center justify-between border-b border-border px-4 shrink-0">
+            <div className="flex h-16 items-center justify-between border-b border-border px-4 shrink-0 relative">
               {sidebarOpen ? (
                 <>
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <Logo className="h-8 w-auto flex-shrink-0" />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setSidebarPinned(false)
-                      toggleSidebar()
-                    }}
-                    className="h-8 w-8 cursor-pointer hover:bg-accent flex-shrink-0"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {/* Freeze Indicator - Always shown when sidebar is open */}
+                    {!isMobile && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={handleFreezeToggle}
+                            className={cn(
+                              "flex items-center justify-center w-6 h-6 rounded-full border-2 transition-all cursor-pointer shadow-sm",
+                              sidebarHoverFrozen
+                                ? "bg-primary border-primary text-primary-foreground"
+                                : "bg-background border-border hover:border-primary hover:bg-accent"
+                            )}
+                            title={sidebarHoverFrozen ? "Unfreeze sidebar" : "Freeze sidebar"}
+                          >
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full transition-colors",
+                              sidebarHoverFrozen ? "bg-primary-foreground" : "bg-muted-foreground"
+                            )} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <p>{sidebarHoverFrozen ? "Click to unfreeze sidebar" : "Click to freeze sidebar"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSidebarPinned(false)
+                        setSidebarHoverFrozen(false)
+                        toggleSidebar()
+                      }}
+                      className="h-8 w-8 cursor-pointer hover:bg-accent flex-shrink-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </>
               ) : (
                 <div className="flex w-full items-center justify-center">
@@ -291,6 +338,7 @@ export function Sidebar() {
                     size="icon"
                     onClick={() => {
                       setSidebarPinned(true)
+                      setSidebarHoverFrozen(false)
                       toggleSidebar()
                     }}
                     className="h-8 w-8 cursor-pointer hover:bg-accent"
