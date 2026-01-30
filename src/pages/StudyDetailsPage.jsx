@@ -253,12 +253,12 @@ export default function StudyDetailsPage() {
             <CardContent className="pt-6">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <ExternalLink className="mb-4 h-16 w-16 text-muted-foreground" />
-                <h3 className="mb-2 text-xl font-semibold">OHIF Viewer Integration</h3>
+                <h3 className="mb-2 text-xl font-semibold">Advanced DICOM Viewer</h3>
                 <p className="mb-6 text-muted-foreground">
-                  Select a study from the Studies page to view it in the integrated OHIF DICOM viewer
+                  Select a study from the Studies page to view it in the integrated high-performance DICOM viewer
                 </p>
                 <Button onClick={() => navigate(`/viewer/mock?study=${details.studyUID}`)}>
-                  Open in OHIF Viewer
+                  Launch Viewer
                 </Button>
                 <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-lg border border-border p-4">
